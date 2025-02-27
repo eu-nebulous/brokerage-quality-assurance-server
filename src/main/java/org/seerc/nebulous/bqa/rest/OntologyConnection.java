@@ -18,12 +18,16 @@ public class OntologyConnection{
 	private WebClient client;
 
 	private OntologyConnection(String host) {
-		client = WebClient.create(host); //localhost:80
+		System.out.println(host);
+
+		client = WebClient.create(host);
+			
 	}
 	
 	public static OntologyConnection getInstance(String host) {
 		if(singleton == null)
 			singleton = new OntologyConnection(host);
+		
 		
 		return singleton;
 	}
@@ -58,6 +62,15 @@ public class OntologyConnection{
 				.body(BodyInserters.fromValue(new CreateIndividualPostBody (individualURI, classURI)))
 			    .retrieve().bodyToMono(String.class).block();
 	}
+	
+	public String createIndividualExpression(String individualURI, String classURI) {
+		return client.post().uri(URI.create("/create/individual/expression"))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(new CreateIndividualPostBody (individualURI, classURI)))
+			    .retrieve().bodyToMono(String.class).block();
+	}
+	
 	public String createObjectProperty(String objectPropertyURI, String domainURI, String rangeURI) {
 		return client.post().uri(URI.create("/create/objectProperty"))
 				.accept(MediaType.APPLICATION_JSON)
@@ -78,7 +91,13 @@ public class OntologyConnection{
 		return client.get().uri(URI.create("/countInstances?dlQuery=" + dlQuery))
 					.retrieve().bodyToMono(Integer.class).block();
 	}
-	
+	public String createClassExpressionClass(String classURI, String classExpression) {
+		return client.post().uri(URI.create("/create/class/expression"))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromValue(new CreateClassExpressionClassPostBody(classURI, classExpression)))
+			    .retrieve().bodyToMono(String.class).block();
+	}
 	public List<String> getInstances(String dlQuery) {
 		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/instances?dlQuery=" + dlQuery))
 				.retrieve().bodyToMono(String[].class).block()));
@@ -97,10 +116,22 @@ public class OntologyConnection{
 		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/superclasses?dlQuery=" + dlQuery ))
 				.retrieve().bodyToMono(String[].class).block()));
 	}
+	public List<String> getSubClasses(String dlQuery) {
+		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/subclasses?dlQuery=" + dlQuery ))
+				.retrieve().bodyToMono(String[].class).block()));
+	}
+	public List<String> getEquivalentClasses(String dlQuery) {
+		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/equivalentClasses?dlQuery=" + dlQuery ))
+				.retrieve().bodyToMono(String[].class).block()));
+	}
 	
 	public List<Object> getDataProperty(String individualName, String dataProperty) {
 		return Arrays.asList(client.get().uri(URI.create("/get/dataProperty?individualName=" + individualName + "&dataProperty=" + dataProperty))
 				.retrieve().bodyToMono(Object[].class).block());
+	}
+	public List<DataPropertyValuesResult> getDataPropertyValues(String individualName, String dataProperty) {
+		return Arrays.asList(client.get().uri(URI.create("/get/dataProperty/values?individualName=" + individualName + "&dataProperty=" + dataProperty))
+				.retrieve().bodyToMono(DataPropertyValuesResult[].class).block());
 	}
 	
 }
