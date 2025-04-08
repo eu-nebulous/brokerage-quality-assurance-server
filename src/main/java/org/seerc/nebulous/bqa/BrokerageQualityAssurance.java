@@ -9,6 +9,7 @@ public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 		
 		OntologyConnection.getInstance(args[0]);
+		System.out.println(args[0]);
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
 
