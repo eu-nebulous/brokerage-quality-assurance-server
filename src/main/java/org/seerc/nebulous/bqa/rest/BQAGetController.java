@@ -4,8 +4,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.seerc.nebulous.bqa.components.Policy;
 
@@ -84,15 +86,20 @@ public class BQAGetController {
 //
 //		return res;
 //	}
-	private String constructNegatedDataPropertyQuery(String dataProperty, String operator, DataPropertyValuesResult v) {
+	private String constructDataPropertyQuery(String dataProperty, String operator, DataPropertyValuesResult v) {
 		
-		String output = "not ";
+		String output = "";
 		final String canonOperator = normalizeOperator(operator);
 	
 		if(v.getDatatype().equals("double") || v.getDatatype().equals("integer"))
-			output += "((" + dataProperty + " some xsd:decimal [" + canonOperator + " " + v.getValue() + "]) or (" + dataProperty + " some xsd:double [" + canonOperator + " \"" + v.getValue() + "\"^^xsd:double]))";
+			if(canonOperator.equals("="))
+				output += "(" + dataProperty + " value " + v.getValue()+")";
+			else if(canonOperator.equals("!="))
+				output += "not (" + dataProperty + " value " + v.getValue()+")";
+			else
+				output += "((" + dataProperty + " some xsd:decimal [" + canonOperator + " " + v.getValue() + "]) or (" + dataProperty + " some xsd:double [" + canonOperator + " \"" + v.getValue() + "\"^^xsd:double]))";
 		else {
-			final String tempOut = "(" + dataProperty + " value " + v.getValue() + ")";
+			final String tempOut = "(" + dataProperty + " value \"" + v.getValue() + "\"^^" + v.getDatatype() +")";
 			if(canonOperator.equals("!="))
 				output += "(not " + tempOut + ")";
 			else
@@ -104,111 +111,122 @@ public class BQAGetController {
 	
 	
 	@GetMapping("/test")
-	private String constructNegatedConstraintQuery(String constraintName) {
+	private String constructConstraintQuery(String constraintName) {
     	List<String> superclasses = ontology.getSuperClasses(encode("{" + constraintName + "}"));
-    	String result = "";
+    	String result= "";
 
     	if(superclasses.contains("LogicalConstraint")){
     		List<String> operands = ontology.getInstances(encode("inverse owlqConstraint value " + constraintName));
-    		String logicalOperator = "";
+    		String logicalOperator = ontology.getInstances(encode("inverse logicalOperator value " + constraintName)).get(0).toLowerCase();
     		int counter = 0;
-    		if(ontology.getInstances(encode("inverse logicalOperator value " + constraintName)).get(0).equals("AND"))
-    			logicalOperator = "(logicalOperator value OR) or";
     		
-    		result += "(" + logicalOperator + "  owlqConstraint some (";
     		for(var operand: operands) {
-    			result +=  constructNegatedConstraintQuery(operand);
+    			result +=  constructConstraintQuery(operand);
     			
     			if(counter != operands.size() - 1)
-    				result += " or ";   				
+    				result += " " + logicalOperator + " ";  				
     			counter++;
     		}
-    		result += "))";
+    		
     	} else if(superclasses.contains("SimpleConstraint")) {
     		String leftOperand = ontology.getInstances(encode("inverse leftOperand value " + constraintName)).get(0);
     		String operator = ontology.getInstances(encode("inverse operator value " + constraintName)).get(0);
     		String canonicalOperator = normalizeOperator(operator);
 //    		Object rightOperand = ontology.getDataProperty(constraintName,  "neb:rightArgument").get(0);
-    		
-    		System.out.println(constraintName);
+   		
+//    		System.out.println(constraintName);
     		DataPropertyValuesResult rightOperand =  ontology.getDataPropertyValues("neb:" + constraintName, "owlq:secondArgument").get(0);
     		
     		if(rightOperand.getDatatype().equals("ERROR"))
     			rightOperand =  ontology.getDataPropertyValues("neb:" + constraintName, "odrl:rightOperand").get(0);
     		    	
     		if(ontology.dataPropertyExists("owlq:" + leftOperand) || ontology.dataPropertyExists("neb:" + leftOperand))
-    			result += constructNegatedDataPropertyQuery(leftOperand, operator, rightOperand);
+    			result += constructDataPropertyQuery(leftOperand, operator, rightOperand);
     	    		
     		else if(leftOperand.toLowerCase().equals("class") && ontology.classExists("owlq:" + rightOperand.getValue()))
-    			result += rightOperand.getValue() + " and ("; //What does this if do????
+    			result += rightOperand.getValue() + " and "; 
     	
     		else {
-	    		result += "(leftOperand value " + leftOperand + ") and (" ;
+	    		result += "leftOperand value " + leftOperand + " and " ;
 	    		
 	    		if(canonicalOperator.contains(">"))
-	    			result += "not (nebOperator some {gteq, gt, GREATER_EQUAL_THAN, GREATER_THAN}) or ";
+	    			result += "nebOperator some {gteq, gt, GREATER_EQUAL_THAN, GREATER_THAN} and ";
 	    		else if(canonicalOperator.contains("<"))
-	    			result += "not (nebOperator some {lteq, lt, LESS_EQUAL_THAN, LESS_THAN}) or ";
+	    			result += "nebOperator some {lteq, lt, LESS_EQUAL_THAN, LESS_THAN} and ";
 	    		else 
-	    			result += "not (nebOperator value " + operator + ") or ";
+	    			result += "nebOperator value " + operator + " and ";
 	
-	    		result += constructNegatedDataPropertyQuery("rightOperand", operator, rightOperand) + ")";
+	    		result += constructDataPropertyQuery("rightOperand", operator, rightOperand);
     		}
     	}    	
-    	return result;	
+    	
+    	return "(" + result + ")";	
 	}	
 	
 	@GetMapping("validate")
-	public Map<String, List<String>> validate(@RequestParam("assetName") String assetName ) {
+	public boolean validate(@RequestParam("assetName") String assetName ) {
+		long startTime = System.currentTimeMillis();
 		List<String> rules = ontology.getInstances(encode("inverse obligation some (inverse hasPolicy value " + assetName + ")"));
 		List<String> sls = ontology.getInstances(encode("inverse serviceLevel value " + assetName));
+		boolean flag = false;
+//		Map<String, List<String>> output = new HashMap<String, List<String>>();
+		String mainQuery = "";
+		String auxQuery = "";
 		
-		Map<String, List<String>> output = new HashMap<String, List<String>>();
-		
-		for(String sl : sls) {
-			System.out.println(constructNegatedConstraintQuery(sl));
-			ontology.createClassExpressionClass( "neb:" + sl + "_EXPRESSION", constructNegatedConstraintQuery(sl));
-			System.out.println("neb:" + sl + "_EXPRESSION");
+		for(int i = 0; i < sls.size(); i++) {
+			String sl = sls.get(i);
+			mainQuery += constructConstraintQuery(sl);
+			
+			if(i != sls.size() - 1)
+				mainQuery += " and ";
+			String transSettle;
+			try {
+				transSettle = ontology.getInstances(encode("firstSL value " + sl)).get(0);
+				auxQuery += " and " + constructDataPropertyQuery("violationThreshold", "lteq", ontology.getDataPropertyValues(transSettle, "owlq:violationThreshold").get(0));
+
+			} catch (Exception e) {
+				transSettle = ontology.getInstances(encode("concernedSL value " + sl)).get(0);
+				auxQuery += " and " + constructDataPropertyQuery("settlementCount", "lteq", ontology.getDataPropertyValues(transSettle, "owlq:settlementCount").get(0));
+			}
+			
+			auxQuery += " and " + constructDataPropertyQuery("evaluationPeriod", "eq", ontology.getDataPropertyValues(transSettle, "owlq:evaluationPeriod").get(0));
+
 		}
+		long queryConstructionTime = System.currentTimeMillis();
+		ontology.createClassExpressionClass( "neb:SL_EXPRESSION", mainQuery + auxQuery);
 		
+//		
 		for(String rule : rules) {			
 			String constraint = ontology.getInstances(encode("inverse constraint value  " + rule)).get(0);
 //			output.put(rule,ontology.getInstances(encode(constructNegatedConstraintQuery(constraint))));
-			System.out.println(constructNegatedConstraintQuery(constraint));
-			
-			ontology.createClassExpressionClass( "neb:" + rule + "_EXPRESSION", (constructNegatedConstraintQuery(constraint)));
+			ontology.createClassExpressionClass( "neb:" + rule + "_EXPRESSION", (constructConstraintQuery(constraint)));
 			
 			List <String> superClasses = ontology.getSuperClasses(encode(rule + "_EXPRESSION"));
-			List<String> subclasses = ontology.getSubClasses(encode( rule + "_EXPRESSION"));
-			List<String> equivalentClasses = ontology.getEquivalentClasses(encode(rule + "_EXPRESSION"));
-			
-			System.out.println(rule);
-			System.out.println(superClasses + "\n");
-			System.out.println(subclasses + "\n");
-			System.out.println(equivalentClasses + "\n");
+//			List<String> subclasses = ontology.getSubClasses(encode( rule + "_EXPRESSION"));
+//			List<String> equivalentClasses = ontology.getEquivalentClasses(encode(rule + "_EXPRESSION"));
+//			
+//			System.out.println("RULE: " + rule);
+			flag = superClasses.contains("SL_EXPRESSION");
 
-		}
-//		List <String> superClasses = ontology.getSuperClasses(encode("ComplexConstraint"));
-//		List<String> subclasses = ontology.getSubClasses(encode("ComplexConstraint"));
-//		List<String> equivalentClasses = ontology.getEquivalentClasses(encode("ComplexConstraint"));
+			System.out.println("superclass:" + superClasses + "\n");
+//			System.out.println("subclass: " + subclasses + "\n");
+//			System.out.println("equivalent: " + equivalentClasses + "\n");
+
+		}		
+
+//			List <String> superClasses = ontology.getSuperClasses(encode("SL_EXPRESSION"));
+//			List<String> subclasses = ontology.getSubClasses(encode("SL_EXPRESSION"));
+//			List<String> equivalentClasses = ontology.getEquivalentClasses(encode("SL_EXPRESSION"));
+//			
+//			System.out.println("superclass:" + superClasses + "\n");
+//			System.out.println("subclass: " + subclasses + "\n");
+//			System.out.println("equivalent: " + equivalentClasses + "\n");
 //		
-//		System.out.println(superClasses + "\n");
-//		System.out.println(subclasses + "\n");
-//		System.out.println(equivalentClasses + "\n");
-		
-		
-		for(String sl : sls) {
-			System.out.println("SL");
-			List <String> superClasses = ontology.getSuperClasses(encode(sl + "_EXPRESSION"));
-			List<String> subclasses = ontology.getSubClasses(encode( sl + "_EXPRESSION"));
-			List<String> equivalentClasses = ontology.getEquivalentClasses(encode(sl + "_EXPRESSION"));
-			
-			System.out.println(superClasses + "\n");
-			System.out.println(subclasses + "\n");
-			System.out.println(equivalentClasses + "\n");
-		}
-		
-		return output;
+		long endTime = System.currentTimeMillis();
+		System.out.println("Time taken to construct: " + (queryConstructionTime - startTime) + " ms");
+		System.out.println("Time taken to validate: " + (endTime - queryConstructionTime) + " ms");
+		System.out.println("Time taken for everything: " + (endTime - startTime) + " ms") ;
+		return flag;
 	}
 // 	private String constructDataPropertyQuery(String dataProperty, String operator, String value) {
 //		String output = null;
@@ -370,34 +388,67 @@ public class BQAGetController {
 //    	
 //    	return result;
 //    }
-//	@GetMapping("validate/internal")
-//	public Map<String, List<String>> validateInternal(@RequestParam("assetName") String assetName) {
-//		System.out.println(assetName);
-//		List<String> sls = ontology.getInstances(encode("inverse serviceLevel value " + assetName));
-//		System.out.println(sls);
-//		
-//		for(String sl : sls) {
-//			List<String> slos = ontology.getInstances(encode("inverse owlqConstraint value " + sl));
-//			System.out.println(slos);
-//			for(String slo : slos) {
-//				String firstArgument = ontology.getInstances(encode("inverse firstArgument value " + slo)).get(0);
-//				String operator = ontology.getInstances(encode("inverse operator value " + slo)).get(0);
-//				Object secondArgument = ontology.getDataProperty("neb:" + slo, "neb:rightArgument").get(0); 
-//				System.out.println(firstArgument + " " + operator + " " + secondArgument);
-//				
-//				String query = "inverse owlqConstraint value " + sl + " and firstArgument value " + firstArgument;
-//				
-////				if(operator.contains("GREATER"))
-////					query += " and operator some {GREATER_EQUAL_THAN, GREATER_THAN, EQUALS, NOT_EQUALS}";
-////				else if(operator.contains("LESSER"))
-//			}
-//			
-//			//	http://localhost/get/instances?dlQuery=inverse%20owlqConstraint%20value%20SLA_0_SL_2%20and%20firstArgument%20value%20AVAILABILITY%20and%20operator%20some%20%7BGREATER_EQUAL_THAN,%20GREATER_THAN,%20EQUALS,%20NOT_EQUALS%7D
-//			
-//		}
-//		
-//		return null;
-//	}
+	@GetMapping("validate/internal")
+	public Map<String, Map<String, List<String>>>  validateInternal(@RequestParam("assetName") String assetName) {
+
+		
+		
+		List<String> sls = ontology.getInstances(encode("inverse serviceLevel value " + assetName));
+		Map<String, Map<String, List<String>>> result = new HashMap<String, Map<String, List<String>>>(sls.size());
+		
+		
+		for(String sl : sls) {
+			List<String> slos = ontology.getInstances(encode("inverse owlqConstraint value " + sl));
+			Map<String, List<String>> slResults = new HashMap<String, List<String>>();
+						
+			for(String slo : slos) {
+				String firstArgument = ontology.getInstances(encode("inverse firstArgument value " + slo)).get(0);
+				
+				List<String> sloResults = slResults.get(firstArgument);
+				if(sloResults == null) {
+					sloResults = new ArrayList<String>();
+					slResults.put(firstArgument, sloResults);
+				}
+				sloResults.add(slo);
+		
+			}
+		
+			slResults.values().removeIf(t -> t.size() < 2);
+			
+			
+			if(slResults.size() != 0)
+				result.put(sl, slResults);
+		}
+		
+		List<String> transitions = ontology.getInstances(encode("inverse slTransition value " + assetName));
+		
+		Map<String, List<String>> transitionResults = new HashMap<String, List<String>>(transitions.size());
+		for(String transition: transitions) {
+			if(ontology.getDataPropertyValues(transition, "owlq:evaluationPeriod").size() > 1) {
+				List<String> evalPer= transitionResults.get("evaluationPeriod");
+				if(evalPer == null) {
+					evalPer = new ArrayList<String>();
+					transitionResults.put("evaluationPeriod", evalPer);
+					evalPer.add(transition);
+				}
+			}
+			
+			if(ontology.getDataPropertyValues(transition, "owlq:violationThreshold").size() > 1) {
+				List<String> violThresh= transitionResults.get("violationThreshold");
+				if(violThresh == null) {
+					violThresh = new ArrayList<String>();
+					transitionResults.put("violationThreshold", violThresh);
+					violThresh.add(transition);
+				}
+			}
+
+		}
+		result.put("transitions", transitionResults);
+		
+		return result;
+	}
+	
+	
 //	
 //	@GetMapping("validate/external")
 //	public Map<String, List<String>> validateExternal(@RequestParam("assetName") String assetName) {
