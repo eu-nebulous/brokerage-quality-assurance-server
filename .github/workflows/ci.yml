@@ -1,0 +1,16 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build-and-push-bqa-server:
+    name: Build and push bqa-server
+    uses: eu-nebulous/github-actions/.github/workflows/build-and-push-container-image.yml@main
+    with:
+      context: .
+      image-name: ontology-server
+    secrets: inherit
