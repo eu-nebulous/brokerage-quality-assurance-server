@@ -4,15 +4,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-<<<<<<< HEAD
-import java.util.List;
-import java.util.Map;
-=======
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
->>>>>>> a1fa093ead017f858208806a506ddbe48d6f6846
 
 import org.seerc.nebulous.bqa.components.Policy;
 
@@ -75,11 +71,7 @@ public class BQAGetController {
 		return operatorCanonical;
 	}
 	
-<<<<<<< HEAD
-=======
-	
-	
->>>>>>> a1fa093ead017f858208806a506ddbe48d6f6846
+
 //	@GetMapping("get/policy")
 //	public Policy getPolicy(@RequestParam("assetName") String assetName) {
 //		Policy res = new Policy();
@@ -94,7 +86,6 @@ public class BQAGetController {
 //
 //		return res;
 //	}
-<<<<<<< HEAD
 	
 	private String constructDataPropertyQuery(String dataProperty, String operator, String value) {
 		String output = null;
@@ -141,29 +132,29 @@ public class BQAGetController {
 		
 	}
 	
-	@GetMapping("validate")
-	public Map<String, List<String>> validate(@RequestParam("assetName") String assetName ) {
-		List<String> rules = ontology.getInstances(encode("inverse obligation some (inverse hasPolicy value " + assetName + ")"));
-		Map<String, List<String>> output = new HashMap<String, List<String>>();
-		List<String> allInstances = null;
-		List<String> conformingInstances = null;
-		for(String rule : rules) {			
-			String constraint = ontology.getInstances(encode("inverse constraint value  " + rule)).get(0);
-
-			conformingInstances = ontology.getInstances(encode(constuctComformingConstraintsDL(constraint) + " and partOf value " + assetName));
-			allInstances = ontology.getInstances(encode(constuctAllConstraintsDL(constraint) + " and partOf value " + assetName));
-
-			allInstances.removeAll(conformingInstances);
-			
-			if(allInstances.size() > 0) {
-				output.put(rule, allInstances);
-				System.out.println("Problem");
-			}else
-				System.out.println("All Good");
-		}
-		
-		return output;
-	}
+//	@GetMapping("validate")
+//	public Map<String, List<String>> validate(@RequestParam("assetName") String assetName ) {
+//		List<String> rules = ontology.getInstances(encode("inverse obligation some (inverse hasPolicy value " + assetName + ")"));
+//		Map<String, List<String>> output = new HashMap<String, List<String>>();
+//		List<String> allInstances = null;
+//		List<String> conformingInstances = null;
+//		for(String rule : rules) {			
+//			String constraint = ontology.getInstances(encode("inverse constraint value  " + rule)).get(0);
+//
+//			conformingInstances = ontology.getInstances(encode(constuctComformingConstraintsDL(constraint) + " and partOf value " + assetName));
+//			allInstances = ontology.getInstances(encode(constuctAllConstraintsDL(constraint) + " and partOf value " + assetName));
+//
+//			allInstances.removeAll(conformingInstances);
+//			
+//			if(allInstances.size() > 0) {
+//				output.put(rule, allInstances);
+//				System.out.println("Problem");
+//			}else
+//				System.out.println("All Good");
+//		}
+//		
+//		return output;
+//	}
 
     public String constuctComformingConstraintsDL(String constraintName) {
     	String result = "";
@@ -394,7 +385,7 @@ public class BQAGetController {
 		return operator;	
 
 	}
-=======
+
 	private String constructDataPropertyQuery(String dataProperty, String operator, DataPropertyValuesResult v) {
 		
 		String output = "";
@@ -697,65 +688,65 @@ public class BQAGetController {
 //    	
 //    	return result;
 //    }
-	@GetMapping("validate/internal")
-	public Map<String, Map<String, List<String>>>  validateInternal(@RequestParam("assetName") String assetName) {
-
-		
-		
-		List<String> sls = ontology.getInstances(encode("inverse serviceLevel value " + assetName));
-		Map<String, Map<String, List<String>>> result = new HashMap<String, Map<String, List<String>>>(sls.size());
-		
-		
-		for(String sl : sls) {
-			List<String> slos = ontology.getInstances(encode("inverse owlqConstraint value " + sl));
-			Map<String, List<String>> slResults = new HashMap<String, List<String>>();
-						
-			for(String slo : slos) {
-				String firstArgument = ontology.getInstances(encode("inverse firstArgument value " + slo)).get(0);
-				
-				List<String> sloResults = slResults.get(firstArgument);
-				if(sloResults == null) {
-					sloResults = new ArrayList<String>();
-					slResults.put(firstArgument, sloResults);
-				}
-				sloResults.add(slo);
-		
-			}
-		
-			slResults.values().removeIf(t -> t.size() < 2);
-			
-			
-			if(slResults.size() != 0)
-				result.put(sl, slResults);
-		}
-		
-		List<String> transitions = ontology.getInstances(encode("inverse slTransition value " + assetName));
-		
-		Map<String, List<String>> transitionResults = new HashMap<String, List<String>>(transitions.size());
-		for(String transition: transitions) {
-			if(ontology.getDataPropertyValues(transition, "owlq:evaluationPeriod").size() > 1) {
-				List<String> evalPer= transitionResults.get("evaluationPeriod");
-				if(evalPer == null) {
-					evalPer = new ArrayList<String>();
-					transitionResults.put("evaluationPeriod", evalPer);
-					evalPer.add(transition);
-				}
-			}
-			
-			if(ontology.getDataPropertyValues(transition, "owlq:violationThreshold").size() > 1) {
-				List<String> violThresh= transitionResults.get("violationThreshold");
-				if(violThresh == null) {
-					violThresh = new ArrayList<String>();
-					transitionResults.put("violationThreshold", violThresh);
-					violThresh.add(transition);
-				}
-			}
-
-		}
-		result.put("transitions", transitionResults);
-		
-		return result;
-	}
+//	@GetMapping("validate/internal")
+//	public Map<String, Map<String, List<String>>>  validateInternal(@RequestParam("assetName") String assetName) {
+//
+//		
+//		
+//		List<String> sls = ontology.getInstances(encode("inverse serviceLevel value " + assetName));
+//		Map<String, Map<String, List<String>>> result = new HashMap<String, Map<String, List<String>>>(sls.size());
+//		
+//		
+//		for(String sl : sls) {
+//			List<String> slos = ontology.getInstances(encode("inverse owlqConstraint value " + sl));
+//			Map<String, List<String>> slResults = new HashMap<String, List<String>>();
+//						
+//			for(String slo : slos) {
+//				String firstArgument = ontology.getInstances(encode("inverse firstArgument value " + slo)).get(0);
+//				
+//				List<String> sloResults = slResults.get(firstArgument);
+//				if(sloResults == null) {
+//					sloResults = new ArrayList<String>();
+//					slResults.put(firstArgument, sloResults);
+//				}
+//				sloResults.add(slo);
+//		
+//			}
+//		
+//			slResults.values().removeIf(t -> t.size() < 2);
+//			
+//			
+//			if(slResults.size() != 0)
+//				result.put(sl, slResults);
+//		}
+//		
+//		List<String> transitions = ontology.getInstances(encode("inverse slTransition value " + assetName));
+//		
+//		Map<String, List<String>> transitionResults = new HashMap<String, List<String>>(transitions.size());
+//		for(String transition: transitions) {
+//			if(ontology.getDataPropertyValues(transition, "owlq:evaluationPeriod").size() > 1) {
+//				List<String> evalPer= transitionResults.get("evaluationPeriod");
+//				if(evalPer == null) {
+//					evalPer = new ArrayList<String>();
+//					transitionResults.put("evaluationPeriod", evalPer);
+//					evalPer.add(transition);
+//				}
+//			}
+//			
+//			if(ontology.getDataPropertyValues(transition, "owlq:violationThreshold").size() > 1) {
+//				List<String> violThresh= transitionResults.get("violationThreshold");
+//				if(violThresh == null) {
+//					violThresh = new ArrayList<String>();
+//					transitionResults.put("violationThreshold", violThresh);
+//					violThresh.add(transition);
+//				}
+//			}
+//
+//		}
+//		result.put("transitions", transitionResults);
+//		
+//		return result;
+//	}
 	
 	
 //	
@@ -867,7 +858,6 @@ public class BQAGetController {
 //		return operator;	
 //
 //	}
->>>>>>> a1fa093ead017f858208806a506ddbe48d6f6846
 	private String encode(String query) {
 		return URLEncoder.encode(query, StandardCharsets.UTF_8);
 	}
