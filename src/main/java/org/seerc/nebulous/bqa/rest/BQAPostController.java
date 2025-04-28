@@ -17,7 +17,11 @@ public class BQAPostController {
 	public void createPolicy(@RequestBody Policy policy) {
 		
 		String policyName = "neb:POLICY_" + policy.getAsset();
+<<<<<<< HEAD
 		ontology.createIndividual("odrl:Set", policyName);
+=======
+		ontology.createIndividual(policyName, "odrl:Set");
+>>>>>>> a1fa093ead017f858208806a506ddbe48d6f6846
 		
 		ontology.createObjectProperty("odrl:hasPolicy", policy.getAsset(), policyName);
 		
