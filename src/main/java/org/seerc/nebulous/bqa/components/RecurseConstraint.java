@@ -36,16 +36,10 @@ public class RecurseConstraint {
 		}else {
 			ComplexConstraint constr = (ComplexConstraint) constraint;
 			
-			ontology.createIndividual(constraintName, "odrl:LogicalConstraint");
-<<<<<<< HEAD
-			
-			for(Constraint c : constr.getOperands()) {
-				ontology.createObjectProperty("odrl:" + constr.getOperator(), constraintName, buildConstraint(c));
-=======
+
 			ontology.createObjectProperty("owlq:logicalOperator", constraintName, "owlq:" + constr.getOperator().toUpperCase());
 			for(Constraint c : constr.getOperands()) {
 				ontology.createObjectProperty("owlq:constraint" , constraintName, buildConstraint(c));
->>>>>>> a1fa093ead017f858208806a506ddbe48d6f6846
 			}
 		}
 		return constraintName;
