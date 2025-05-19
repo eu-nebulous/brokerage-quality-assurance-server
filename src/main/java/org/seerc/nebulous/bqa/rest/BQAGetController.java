@@ -528,7 +528,13 @@ public class BQAGetController {
 		System.out.println("Time taken for everything: " + (endTime - startTime) + " ms") ;
 		return flag;
 	}
-// 	private String constructDataPropertyQuery(String dataProperty, String operator, String value) {
+
+	@GetMapping("get/metrics")
+	public List<String> getMetrics(@RequestParam String slaName){
+		return SLAConnection.getInstance().getMetrics(slaName);
+		
+	}
+	// 	private String constructDataPropertyQuery(String dataProperty, String operator, String value) {
 //		String output = null;
 //		boolean isNumber = false;
 //		String operatorCanonical = normalizeOperator(operator);
