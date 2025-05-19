@@ -36,7 +36,6 @@ public class RecurseConstraint {
 		}else {
 			ComplexConstraint constr = (ComplexConstraint) constraint;
 			
-
 			ontology.createObjectProperty("owlq:logicalOperator", constraintName, "owlq:" + constr.getOperator().toUpperCase());
 			for(Constraint c : constr.getOperands()) {
 				ontology.createObjectProperty("owlq:constraint" , constraintName, buildConstraint(c));
