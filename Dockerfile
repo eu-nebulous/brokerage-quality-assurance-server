@@ -14,4 +14,4 @@ FROM docker.io/library/eclipse-temurin:17-jre
 COPY --from=build /bqa-server/target/nebulous-bqa-0.0.1-SNAPSHOT.jar nebulous-sla.jar
 
 ENTRYPOINT ["java", "-jar", "nebulous-sla.jar", "nebulous-ontology-server:80"]
-EXPOSE 8081
+EXPOSE 8080
