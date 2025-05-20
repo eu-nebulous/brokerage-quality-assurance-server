@@ -32,7 +32,7 @@ public class RecurseConstraint {
 			
 			ontology.createObjectProperty("odrl:leftOperand", constraintName, "neb:" +  firstArgumentName);
 			ontology.createObjectProperty("odrl:operator", constraintName, "owlq:" + constr.getOperator().toString());
-			ontology.createDataProperty("odrl:rightOperand", constraintName, constr.getSecondArgument());
+			ontology.createDataProperty("odrl:rightOperand", constraintName, constr.getSecondArgument().toString(), constr.getType());
 		}else {
 			ComplexConstraint constr = (ComplexConstraint) constraint;
 			
