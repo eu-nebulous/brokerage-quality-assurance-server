@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class BQAServeUI {
 	@GetMapping({"/ui"})
-	public String greeting(@RequestParam(name="appId", required = true) String applicationId, @RequestParam(name="nonce", required = true) String nonce ) {
+	public String greeting(@RequestParam(name="appId", required = true) String applicationId) {
 		return "index";
 	}
 }
