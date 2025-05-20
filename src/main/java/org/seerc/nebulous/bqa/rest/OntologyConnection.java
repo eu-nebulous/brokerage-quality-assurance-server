@@ -22,17 +22,14 @@ public class OntologyConnection{
 			
 	}
 	
-	public static OntologyConnection getInstance(String host) {
+	public static OntologyConnection getInstance() {
 		if(singleton == null)
-			singleton = new OntologyConnection(host);
+			singleton = new OntologyConnection("http://nebulous-ontology-server:80");
 		
 
 		return singleton;
 	}
-	
-	public static OntologyConnection getInstance() {
-		return singleton;
-	}
+
 
 	public void getSimpleConstraintBqa(SimpleConstraint constraint, String constraintName) {
 		constraint.setFirstArgument(getInstances("inverse%20leftOperand%20value%20" + constraintName).get(0));
