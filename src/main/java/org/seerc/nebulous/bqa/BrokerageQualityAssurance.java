@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 		
-
+		OntologyConnection.getInstance();
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
 
