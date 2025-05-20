@@ -24,7 +24,9 @@ public class OntologyConnection{
 	
 	public static OntologyConnection getInstance() {
 		if(singleton == null)
+
 			singleton = new OntologyConnection("http://nebulous-ontology-server:80");
+
 		
 
 		return singleton;
@@ -75,11 +77,11 @@ public class OntologyConnection{
 			    .retrieve().bodyToMono(String.class).block();
 	}
 	
-	public String createDataProperty(String dataPropertyURI, String domainURI, Object value) {
+	public String createDataProperty(String dataPropertyURI, String domainURI, String value, String datatype) {
 		return client.post().uri(URI.create("/create/dataProperty"))
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(BodyInserters.fromValue(new CreateDataPropertyPostBody(dataPropertyURI, domainURI, value)))
+				.body(BodyInserters.fromValue(new CreateDataPropertyPostBody(dataPropertyURI, domainURI, value, datatype)))
 			    .retrieve().bodyToMono(String.class).block();
 	}
 	
