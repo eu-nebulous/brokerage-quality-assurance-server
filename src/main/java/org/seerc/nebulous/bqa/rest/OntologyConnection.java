@@ -19,15 +19,13 @@ public class OntologyConnection{
 
 	private OntologyConnection(String host) {
 		client = WebClient.create(host); //localhost:80
+		System.out.println("The host is: " + host);
 			
 	}
 	
 	public static OntologyConnection getInstance() {
 		if(singleton == null)
-
 			singleton = new OntologyConnection("http://nebulous-ontology-server:80");
-
-		
 
 		return singleton;
 	}
