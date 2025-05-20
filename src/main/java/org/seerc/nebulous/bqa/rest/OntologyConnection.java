@@ -18,7 +18,7 @@ public class OntologyConnection{
 	private WebClient client;
 
 	private OntologyConnection(String host) {
-		client = WebClient.create(host); //localhost:80
+		client = WebClient.create(host);
 		System.out.println("The host is: " + host);
 			
 	}
