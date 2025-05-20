@@ -24,7 +24,9 @@ public class OntologyConnection{
 	
 	public static OntologyConnection getInstance() {
 		if(singleton == null)
-			singleton = new OntologyConnection("http://nebulus-ontology-server:80");
+
+			singleton = new OntologyConnection("http://nebulous-ontology-server:80");
+
 		
 
 		return singleton;
