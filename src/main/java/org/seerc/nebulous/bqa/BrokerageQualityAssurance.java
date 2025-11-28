@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 		
-		OntologyConnection.getInstance("nebulous-ontology-server:80");
+		OntologyConnection.getInstance("http://nebulous-ontology-server:80");
 		EXNConnection.getInstance();
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
