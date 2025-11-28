@@ -35,10 +35,7 @@ public class SimpleConstraint implements Constraint{
 		return "SimpleConstraint [firstArgument = " + firstArgument + ", operator = " + operator
 				+ ", secondArgument = " + secondArgument + "]";
 	}
-	@Override
-	public String getType() {
-		return "Simple";
-	}
+
 	
 	
 }
