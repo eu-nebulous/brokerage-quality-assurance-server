@@ -56,13 +56,13 @@ public class EXNConnection {
 					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
 			        
 					
-					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
-						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
-							System.out.println(indName);
-							ontology.deleteIndividual(indName);
-						}
-						ontology.deleteIndividual("POLICY_" + uuid);
-					}
+					// if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
+					// 	for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
+					// 		System.out.println(indName);
+					// 		ontology.deleteIndividual(indName);
+					// 	}
+					// 	ontology.deleteIndividual("POLICY_" + uuid);
+					// }
 					
 //					
 //					System.out.println(map.get("children"));
