@@ -10,7 +10,7 @@ public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 
 		System.out.println("");
-		OntologyConnection.getInstance("http://nebulous-ontology-server:80");
+		OntologyConnection.getInstance("nebulous-ontology-server:80");
 		EXNConnection.getInstance();
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
