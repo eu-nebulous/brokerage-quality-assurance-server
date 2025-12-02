@@ -8,11 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
-		
-		OntologyConnection.getInstance(args[0]);
-		System.out.println(args[0]);
+
+		System.out.println("");
+		OntologyConnection.getInstance("http://nebulous-ontology-server:80");
 		EXNConnection.getInstance();
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
+
 
 }
