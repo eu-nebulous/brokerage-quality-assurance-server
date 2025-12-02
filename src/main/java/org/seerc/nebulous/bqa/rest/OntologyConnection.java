@@ -6,8 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.seerc.nebulous.bqa.components.ComparisonOperator;
 import org.seerc.nebulous.bqa.components.Constraint;
@@ -28,10 +30,10 @@ public class OntologyConnection{
 
 	private static Map<String, String> hasPolicy;
 	private OntologyConnection(String host) {
-//		System.out.println(host);
-
+		System.out.println("in:" + host);
 		client = WebClient.create(host);
 		hasPolicy = new HashMap<String, String>();
+		System.out.println(client.toString());
 	}
 	
 	public static OntologyConnection getInstance(String host) {
