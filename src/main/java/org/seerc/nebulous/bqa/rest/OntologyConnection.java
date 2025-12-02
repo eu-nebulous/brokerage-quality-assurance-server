@@ -30,7 +30,7 @@ public class OntologyConnection{
 
 	private static Map<String, String> hasPolicy;
 	private OntologyConnection(String host) {
-		System.out.println(host);
+		System.out.println("in:" + host);
 		client = WebClient.create(host);
 		hasPolicy = new HashMap<String, String>();
 		System.out.println(client.toString());
