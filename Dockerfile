@@ -13,5 +13,5 @@ RUN mvn package -Dmaven.test.skip
 FROM docker.io/library/eclipse-temurin:17-jre
 COPY --from=build /bqa-server/target/nebulous-bqa-0.0.1-SNAPSHOT.jar nebulous-bqa.jar
 
-ENTRYPOINT ["java", "-jar", "nebulous-bqa.jar", "http://nebulous-ontology-server:80"]
+ENTRYPOINT ["java", "-jar", "nebulous-bqa.jar", "nebulous-ontology-server:80"]
 EXPOSE 8080
