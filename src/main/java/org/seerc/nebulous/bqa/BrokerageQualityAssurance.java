@@ -12,7 +12,7 @@ public class BrokerageQualityAssurance{
 		System.out.println("Ontology URL: " + args[0]);
 		OntologyConnection.getInstance(args[0]);
 		EXNConnection.getInstance();
-		System.out.println("After");
+		System.out.println("Set up Complete.");
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
 

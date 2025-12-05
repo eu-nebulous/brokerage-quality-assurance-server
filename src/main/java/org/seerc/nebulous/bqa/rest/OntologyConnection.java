@@ -30,10 +30,11 @@ public class OntologyConnection{
 
 	private static Map<String, String> hasPolicy;
 	private OntologyConnection(String host) {
-		System.out.println("in:" + host);
-		client = WebClient.create(host);
+		System.out.println("Setting up connection to " + host);
+		client = WebClient.create("http://nebulous-ontology-server:80");
 		hasPolicy = new HashMap<String, String>();
-		System.out.println("OUT");
+		
+		System.out.println("Finished setting up connection to " + host);
 	}
 	
 	public static OntologyConnection getInstance(String host) {
