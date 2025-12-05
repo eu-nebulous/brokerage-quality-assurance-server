@@ -1,19 +1,9 @@
 package org.seerc.nebulous.bqa.rest;
 
 public class CreateDataPropertyPostBody {
-  
 	private String dataPropertyURI, domainURI;
-	private String value, type;
-
-	public CreateDataPropertyPostBody(String dataPropertyURI, String domainURI, String value, String type) {
-		super();
-		this.dataPropertyURI = dataPropertyURI;
-		this.domainURI = domainURI;
-		this.value = value;
-		this.type = type;
-	}
-
-
+	private Object value;
+	private String type;
 	public String getDataPropertyURI() {
 		return dataPropertyURI;
 	}
@@ -30,11 +20,18 @@ public class CreateDataPropertyPostBody {
 		this.domainURI = domainURI;
 	}
 
-	public String getValue() {
+	public CreateDataPropertyPostBody(String dataPropertyURI, String domainURI, Object value, String type) {
+		this.dataPropertyURI = dataPropertyURI;
+		this.domainURI = domainURI;
+		this.value = value;
+		this.type = type;
+	}
+
+	public Object getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(Object value) {
 		this.value = value;
 	}
 
@@ -44,6 +41,7 @@ public class CreateDataPropertyPostBody {
 
 	public void setType(String type) {
 		this.type = type;
-	}	
+	}
+	
 	
 }
