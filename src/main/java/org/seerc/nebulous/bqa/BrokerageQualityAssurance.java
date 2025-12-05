@@ -9,9 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 
-		String ontologyHost = "http://nebulous-ontology-server:80";
-		System.out.println(ontologyHost);
-		OntologyConnection.getInstance(ontologyHost);
+		System.out.println("Ontology URL: " + args[0]);
+		OntologyConnection.getInstance(args[0]);
 		EXNConnection.getInstance();
 		System.out.println("After");
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
