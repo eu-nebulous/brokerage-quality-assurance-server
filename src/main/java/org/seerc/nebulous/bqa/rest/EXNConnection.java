@@ -45,7 +45,8 @@ public class EXNConnection {
 		    @SuppressWarnings("unchecked")
 			@Override
 		    public void onMessage(String key, String address, Map body, Message message, Context context) {
-		    	
+		    	System.out.println("Starting Policy Creation...");
+
 		    	
 		    	ObjectMapper objectMapper = new ObjectMapper();
 		    	Map<String, Object> map = null;
