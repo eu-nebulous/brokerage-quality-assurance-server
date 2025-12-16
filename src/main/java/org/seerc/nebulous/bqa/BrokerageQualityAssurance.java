@@ -12,18 +12,15 @@ public class BrokerageQualityAssurance{
 		
 		System.out.println("Tryingo request to ontology server");
 		System.out.println(String.format("Base URL: \"%s\"", args[0]));
-		//"http://localhost:808" < OK
-		//http://nebulous-ontology-server:80
-		//http://nebulous-ontology-server:80
+		
 		WebClient c = WebClient.create(args[0]);
 		String ret = c.get().uri("/").retrieve().bodyToMono(String.class).block();
 		System.out.println(String.format("Request  to ontology server done %s",ret));	
 
 		System.out.println("Ontology URL: " + args[0]);
-		//OntologyConnection oc = OntologyConnection.getInstance("localhost:808");
-		
-		//oc.countInstances("%7BPOLICY_4bd231d6-2092-45c3-985a-7a31425039da%7D");
-		
+		OntologyConnection oc = OntologyConnection.getInstance( args[0]);
+		int res = oc.countInstances("Thing");
+		System.out.println(String.format("oc.countInstances %d",res));
 		EXNConnection.getInstance();
 		System.out.println("Set up Complete.");
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
