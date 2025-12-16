@@ -46,41 +46,41 @@ public class EXNConnection {
 			@Override
 		    public void onMessage(String key, String address, Map body, Message message, Context context) {
 		    	System.out.println("Starting Policy Creation...");
-
-		    	
-		    	ObjectMapper objectMapper = new ObjectMapper();
-		    	Map<String, Object> map = null;
-				try {
-					String uuid = (String) message.property("application");
-					ontology.removePolicy(uuid);
-
-					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
-			        
-					
-					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
-						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
-							System.out.println(indName);
-							ontology.deleteIndividual(indName);
-						}
-						ontology.deleteIndividual("POLICY_" + uuid);
-					}
-					
+//
+//		    	
+//		    	ObjectMapper objectMapper = new ObjectMapper();
+//		    	Map<String, Object> map = null;
+//				try {
+//					String uuid = (String) message.property("application");
+//					ontology.removePolicy(uuid);
+//
+//					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
+//			        
 //					
-//					System.out.println(map.get("children"));
-					if(((List) map.get("children")).size() == 1)
-						map = (Map<String, Object>) ((List) map.get("children")).get(0);
-					
-					Policy p = Policy.ConstructPolicy(map, uuid); //fix!
-//			        System.out.println(p.getRules());
-					while(!ontology.createPolicy(p));
-				
-					
-					OntologyConnection.addPolicy(uuid, message.correlationId().toString());
-//					System.out.println("POLICY: " + p);
-				} catch (JsonProcessingException | ClientException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
+//						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
+//							System.out.println(indName);
+//							ontology.deleteIndividual(indName);
+//						}
+//						ontology.deleteIndividual("POLICY_" + uuid);
+//					}
+//					
+////					
+////					System.out.println(map.get("children"));
+//					if(((List) map.get("children")).size() == 1)
+//						map = (Map<String, Object>) ((List) map.get("children")).get(0);
+//					
+//					Policy p = Policy.ConstructPolicy(map, uuid); //fix!
+////			        System.out.println(p.getRules());
+//					while(!ontology.createPolicy(p));
+//				
+//					
+//					OntologyConnection.addPolicy(uuid, message.correlationId().toString());
+////					System.out.println("POLICY: " + p);
+//				} catch (JsonProcessingException | ClientException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 		    }
 		};
 
