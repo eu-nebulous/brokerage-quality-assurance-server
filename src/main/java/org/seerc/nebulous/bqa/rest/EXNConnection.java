@@ -57,26 +57,26 @@ public class EXNConnection {
 					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
 			        
 					
-					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
-						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
-							System.out.println(indName);
-							ontology.deleteIndividual(indName);
-						}
-						ontology.deleteIndividual("POLICY_" + uuid);
-					}
-					
+//					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
+//						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
+//							System.out.println(indName);
+//							ontology.deleteIndividual(indName);
+//						}
+//						ontology.deleteIndividual("POLICY_" + uuid);
+//					}
 //					
-//					System.out.println(map.get("children"));
-					if(((List) map.get("children")).size() == 1)
-						map = (Map<String, Object>) ((List) map.get("children")).get(0);
-					
-					Policy p = Policy.ConstructPolicy(map, uuid); //fix!
-//			        System.out.println(p.getRules());
-					while(!ontology.createPolicy(p));
-				
-					
-					OntologyConnection.addPolicy(uuid, message.correlationId().toString());
-//					System.out.println("POLICY: " + p);
+////					
+////					System.out.println(map.get("children"));
+//					if(((List) map.get("children")).size() == 1)
+//						map = (Map<String, Object>) ((List) map.get("children")).get(0);
+//					
+//					Policy p = Policy.ConstructPolicy(map, uuid); //fix!
+////			        System.out.println(p.getRules());
+//					while(!ontology.createPolicy(p));
+//				
+//					
+//					OntologyConnection.addPolicy(uuid, message.correlationId().toString());
+////					System.out.println("POLICY: " + p);
 				} catch (JsonProcessingException | ClientException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
