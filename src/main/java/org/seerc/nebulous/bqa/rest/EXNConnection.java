@@ -77,10 +77,10 @@ public class EXNConnection {
 //					
 //					OntologyConnection.addPolicy(uuid, message.correlationId().toString());
 ////					System.out.println("POLICY: " + p);
-				} catch (JsonProcessingException | ClientException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				} catch (JsonProcessingException | ClientException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 		    }
 		};
 
