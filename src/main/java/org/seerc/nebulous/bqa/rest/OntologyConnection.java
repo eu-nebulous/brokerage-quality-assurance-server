@@ -21,14 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 public class OntologyConnection{
 	
 	private static OntologyConnection singleton = null;
 	
 	private WebClient client;
-
 	private static Map<String, String> hasPolicy;
+	
 	private OntologyConnection(String host) {
 		System.out.println("Setting up connection to " + host);
 		client = WebClient.create(host);
@@ -219,8 +218,8 @@ public class OntologyConnection{
 	
 	public boolean validate(String assetName ) {
 		long startTime = System.currentTimeMillis();
-		List<String> rules = getInstances(encode("inverse obligation some (inverse hasPolicy value " + assetName + ")"));
-		List<String> sls = getInstances(encode("inverse serviceLevel value " + assetName));
+		List<String> rules = getInstances("inverse obligation some (inverse hasPolicy value " + assetName + ")");
+		List<String> sls = getInstances("inverse serviceLevel value " + assetName);
 		boolean flag = false;
 //		Map<String, List<String>> output = new HashMap<String, List<String>>();
 		String mainQuery = "";
@@ -233,7 +232,7 @@ public class OntologyConnection{
 				mainQuery += " and ";
 			String transSettle;
 			try {
-				transSettle = getInstances(encode("firstSL value " + sl)).get(0);
+				transSettle = getInstances("firstSL value " + sl).get(0);
 				auxQuery += " and " + constructDataPropertyQuery("violationThreshold", "lteq", getDataPropertyValues(transSettle, "owlq:violationThreshold").get(0));
 
 			} catch (Exception e) {
@@ -305,7 +304,7 @@ public class OntologyConnection{
 		constraint.setOperator(ComparisonOperator.valueOf((String) getInstances("inverse%20operator%20value%20" + constraintName).get(0)));
 	}
 	public String createIndividual(String individualURI, String classURI) {
-		return client.post().uri(URI.create("/create/individual"))
+		return client.post().uri("/create/individual")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(new CreateIndividualPostBody (individualURI, classURI)))
@@ -313,7 +312,7 @@ public class OntologyConnection{
 	}
 	
 	public String createIndividualExpression(String individualURI, String classURI) {
-		return client.post().uri(URI.create("/create/individual/expression"))
+		return client.post().uri("/create/individual/expression")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(new CreateIndividualPostBody (individualURI, classURI)))
@@ -321,7 +320,7 @@ public class OntologyConnection{
 	}
 	
 	public String createObjectProperty(String objectPropertyURI, String domainURI, String rangeURI) {
-		return client.post().uri(URI.create("/create/objectProperty"))
+		return client.post().uri("/create/objectProperty")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(new CreateObjectPropertyPostBody(objectPropertyURI, domainURI, rangeURI)))
@@ -329,7 +328,7 @@ public class OntologyConnection{
 	}
 	
 	public String createDataProperty(String dataPropertyURI, String domainURI, Object value, String type) {
-		return client.post().uri(URI.create("/create/dataProperty"))
+		return client.post().uri("/create/dataProperty")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(new CreateDataPropertyPostBody(dataPropertyURI, domainURI, value, type)))
@@ -337,56 +336,56 @@ public class OntologyConnection{
 	}
 	
 	public int countInstances(String dlQuery) {
-		return client.get().uri(URI.create("/countInstances?dlQuery=" + encode(dlQuery)))
+		return client.get().uri("/countInstances?dlQuery=" + encode(dlQuery))
 					.retrieve().bodyToMono(Integer.class).block();
 	}
 	public String createClassExpressionClass(String classURI, String classExpression) {
-		return client.post().uri(URI.create("/create/class/expression"))
+		return client.post().uri("/create/class/expression")
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromValue(new CreateClassExpressionClassPostBody(classURI, classExpression)))
 			    .retrieve().bodyToMono(String.class).block();
 	}
 	public List<String> getInstances(String dlQuery) {
-		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/instances?dlQuery=" + encode(dlQuery)))
+		return new ArrayList<String>(Arrays.asList(client.get().uri("/get/instances?dlQuery=" + encode(dlQuery))
 				.retrieve().bodyToMono(String[].class).block()));
 	}
 	public boolean dataPropertyExists(String dataProperty) {
-		return client.get().uri(URI.create("/exists/dataProperty?dataProperty=" + dataProperty))
+		return client.get().uri("/exists/dataProperty?dataProperty=" + dataProperty)
 				.retrieve().bodyToMono(Boolean.class).block();
 	}
 	public boolean classExists(String cls) {
-		return client.get().uri(URI.create("/exists/class?class=" + cls))
+		return client.get().uri("/exists/class?class=" + cls)
 				.retrieve().bodyToMono(Boolean.class).block();
 	}
 	
 	
 	public List<String> getSuperClasses(String dlQuery) {
-		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/superclasses?dlQuery=" + encode(dlQuery) ))
+		return new ArrayList<String>(Arrays.asList(client.get().uri("/get/superclasses?dlQuery=" + encode(dlQuery) )
 				.retrieve().bodyToMono(String[].class).block()));
 	}
 	public List<String> getSubClasses(String dlQuery) {
-		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/subclasses?dlQuery=" + dlQuery ))
+		return new ArrayList<String>(Arrays.asList(client.get().uri("/get/subclasses?dlQuery=" + dlQuery )
 				.retrieve().bodyToMono(String[].class).block()));
 	}
 	public List<String> getEquivalentClasses(String dlQuery) {
-		return new ArrayList<String>(Arrays.asList(client.get().uri(URI.create("/get/equivalentClasses?dlQuery=" + dlQuery ))
+		return new ArrayList<String>(Arrays.asList(client.get().uri("/get/equivalentClasses?dlQuery=" + dlQuery )
 				.retrieve().bodyToMono(String[].class).block()));
 	}
 	
 	public List<Object> getDataProperty(String individualName, String dataProperty) {
-		return Arrays.asList(client.get().uri(URI.create("/get/dataProperty?individualName=" + individualName + "&dataProperty=" + dataProperty))
+		return Arrays.asList(client.get().uri("/get/dataProperty?individualName=" + individualName + "&dataProperty=" + dataProperty)
 				.retrieve().bodyToMono(Object[].class).block());
 	}
 	public List<DataPropertyValuesResult> getDataPropertyValues(String individualName, String dataProperty) {
-		return Arrays.asList(client.get().uri(URI.create("/get/dataProperty/values?individualName=" + encode(individualName) + "&dataProperty=" + encode(dataProperty)))
+		return Arrays.asList(client.get().uri("/get/dataProperty/values?individualName=" + encode(individualName) + "&dataProperty=" + encode(dataProperty))
 				.retrieve().bodyToMono(DataPropertyValuesResult[].class).block());
 	}
 	private String encode(String query) {
 		return URLEncoder.encode(query, StandardCharsets.UTF_8);
 	}
 	public void deleteIndividual(String individualName) {
-		client.delete().uri(URI.create("/delete/individual?individualName=" + individualName))
+		client.delete().uri("/delete/individual?individualName=" + individualName)
 			.accept(MediaType.APPLICATION_JSON)
 		    .retrieve().bodyToMono(String.class).block();
 	}
