@@ -46,17 +46,17 @@ public class EXNConnection {
 			@Override
 		    public void onMessage(String key, String address, Map body, Message message, Context context) {
 		    	System.out.println("Starting Policy Creation...");
-//
-//		    	
-//		    	ObjectMapper objectMapper = new ObjectMapper();
-//		    	Map<String, Object> map = null;
-//				try {
-//					String uuid = (String) message.property("application");
-//					ontology.removePolicy(uuid);
-//
-//					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
-//			        
-//					
+
+		    	
+		    	ObjectMapper objectMapper = new ObjectMapper();
+		    	Map<String, Object> map = null;
+				try {
+					String uuid = (String) message.property("application");
+					ontology.removePolicy(uuid);
+
+					map = objectMapper.readValue((String) body.get("slMetaConstraints"), new TypeReference<Map<String,Object>>(){});
+			        
+					
 //					if(ontology.countInstances("{POLICY_" + uuid + "}") > 0) {
 //						for(String indName : ontology.getInstances("partOf value POLICY_" + uuid)) {
 //							System.out.println(indName);
