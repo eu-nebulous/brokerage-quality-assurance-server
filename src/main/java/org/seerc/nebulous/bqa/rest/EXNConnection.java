@@ -65,8 +65,7 @@ public class EXNConnection {
 						ontology.deleteIndividual("POLICY_" + uuid);
 					}
 					
-//					
-//					System.out.println(map.get("children"));
+					System.out.println(map.get("children"));
 					if(((List) map.get("children")).size() == 1)
 						map = (Map<String, Object>) ((List) map.get("children")).get(0);
 					
