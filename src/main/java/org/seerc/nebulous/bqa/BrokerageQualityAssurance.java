@@ -9,9 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BrokerageQualityAssurance{
 	public static void main(String[] args) {
 		
+		System.out.println("Beginning setup...");
 		OntologyConnection.getInstance(args[0]);
 		EXNConnection.getInstance();
-		System.out.println("Set up Complete.");
+		System.out.println("Set up Complete...");
 		SpringApplication.run(BrokerageQualityAssurance.class, args);
 	}
 
