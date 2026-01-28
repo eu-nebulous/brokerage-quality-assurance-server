@@ -2,11 +2,9 @@ package org.seerc.nebulous.bqa.rest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.qpid.protonj2.client.Message;
 import org.apache.qpid.protonj2.client.exceptions.ClientException;
-import org.junit.rules.Timeout;
 import org.seerc.nebulous.bqa.components.Policy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,7 +20,6 @@ import eu.nebulouscloud.exn.handlers.ConnectorHandler;
 import eu.nebulouscloud.exn.settings.StaticExnConfig;
 
 public class EXNConnection {
-	
 	private static EXNConnection singleton = null;
 	private static ConnectorHandler connectionHandler;
 	private static Handler metaConstraintsHandler;
@@ -82,11 +79,25 @@ public class EXNConnection {
 				}
 		    }
 		};
+		
+
+		
+		String brokerUrl = System.getenv("BROKER_URL");
+		if (brokerUrl == null) brokerUrl = "localhost";
+		
+		String brokerPortStr = System.getenv("BROKER_PORT");
+		Integer brokerPort = brokerPortStr != null ? Integer.parseInt(brokerPortStr) : 5672;
+		
+		String brokerUsername = System.getenv("BROKER_USERNAME");
+		if (brokerUsername == null) brokerUsername = "admin";
+		
+		String brokerPassword = System.getenv("BROKER_PASSWORD");
+		if (brokerPassword == null) brokerPassword = "admin";
 
 		bqaVerification = new Publisher("bqa-reply", "eu.nebulouscloud.ontology.bqa.reply", true, true);
 		metaConstraints = new Consumer("bqa",        "eu.nebulouscloud.ontology.bqa", metaConstraintsHandler, true, true);
-		
-		conn = new Connector("eu", connectionHandler , List.of(bqaVerification), List.of(metaConstraints), new StaticExnConfig("nebulous-activemq",5672,"admin","admin",5));
+		System.out.println(String.format("Got connection properties: BROKER_URL: %s, BROKER_PORT: %s BROKER_USERNAME: %s", brokerUrl, brokerPort, brokerUsername));
+		conn = new Connector("eu", connectionHandler , List.of(bqaVerification), List.of(metaConstraints), new StaticExnConfig(brokerUrl,brokerPort,brokerUsername,brokerPassword,5));
 
 		conn.start();
 		
