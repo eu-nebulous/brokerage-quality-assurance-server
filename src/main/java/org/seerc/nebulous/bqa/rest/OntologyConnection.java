@@ -1,16 +1,12 @@
 package org.seerc.nebulous.bqa.rest;
 
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.seerc.nebulous.bqa.components.ComparisonOperator;
 import org.seerc.nebulous.bqa.components.Constraint;
 import org.seerc.nebulous.bqa.components.Policy;
@@ -165,12 +161,12 @@ public class OntologyConnection{
 		return output;
 	}
 	private String constructConstraintQuery(String constraintName) {
-    	List<String> superclasses = getSuperClasses(encode("{" + constraintName + "}"));
+    	List<String> superclasses = getSuperClasses("{" + constraintName + "}");
     	String result= "";
 
     	if(superclasses.contains("LogicalConstraint")){
-    		List<String> operands = getInstances(encode("inverse owlqConstraint value " + constraintName));
-    		String logicalOperator = getInstances(encode("inverse logicalOperator value " + constraintName)).get(0).toLowerCase();
+    		List<String> operands = getInstances("inverse owlqConstraint value " + constraintName);
+    		String logicalOperator = getInstances("inverse logicalOperator value " + constraintName).get(0).toLowerCase();
     		int counter = 0;
     		
     		for(var operand: operands) {
@@ -182,8 +178,8 @@ public class OntologyConnection{
     		}
     		
     	} else if(superclasses.contains("SimpleConstraint")) {
-    		String leftOperand = getInstances(encode("inverse leftOperand value " + constraintName)).get(0);
-    		String operator = getInstances(encode("inverse operator value " + constraintName)).get(0);
+    		String leftOperand = getInstances("inverse leftOperand value " + constraintName).get(0);
+    		String operator = getInstances("inverse operator value " + constraintName).get(0);
     		String canonicalOperator = normalizeOperator(operator);
 //    		Object rightOperand = getDataProperty(constraintName,  "neb:rightArgument").get(0);
    		
@@ -216,20 +212,19 @@ public class OntologyConnection{
     	return "(" + result + ")";	
 	}
 	
-	public boolean validate(String assetName ) {
+	public Map<Integer, Boolean> validate(String assetName ) {
 		long startTime = System.currentTimeMillis();
 		List<String> rules = getInstances("inverse obligation some (inverse hasPolicy value " + assetName + ")");
 		List<String> sls = getInstances("inverse serviceLevel value " + assetName);
-		boolean flag = false;
+		Map<Integer, Boolean> flags = new HashMap<Integer, Boolean>(sls.size());
 //		Map<String, List<String>> output = new HashMap<String, List<String>>();
-		String mainQuery = "";
-		String auxQuery = "";
+		
 		for(int i = 0; i < sls.size(); i++) {
 			String sl = sls.get(i);
-			mainQuery += constructConstraintQuery(sl);
+			String mainQuery = constructConstraintQuery(sl);
+			String auxQuery = "";
 			
-			if(i != sls.size() - 1)
-				mainQuery += " and ";
+			
 			String transSettle;
 			try {
 				transSettle = getInstances("firstSL value " + sl).get(0);
@@ -242,47 +237,47 @@ public class OntologyConnection{
 			
 			auxQuery += " and " + constructDataPropertyQuery("evaluationPeriod", "eq", getDataPropertyValues(transSettle, "owlq:evaluationPeriod").get(0));
 
+			createClassExpressionClass("neb:" + assetName + "_EXPRESSION_" + (i + 1), mainQuery + auxQuery);
+			System.out.println(mainQuery +auxQuery);
+
+
 		}
 		long queryConstructionTime = System.currentTimeMillis();
 //		System.out.println(mainQuery + auxQuery);
-		createClassExpressionClass("neb:" + assetName + "_EXPRESSION", mainQuery + auxQuery);
+		
 		
 //		
 		for(String rule : rules) {
-//			System.out.println("IN IN IN");
 			String constraint = getInstances("inverse constraint value  " + rule).get(0);
-//			output.put(rule,getInstances(encode(constructNegatedConstraintQuery(constraint))));
 			
-			String constrQuery = constructConstraintQuery(constraint) + "or ((nebOperator some Thing) and (leftOperand some Thing)  and (rightOperand some rdfs:Literal))";	
-			System.out.println(constrQuery);
-			createClassExpressionClass("neb:" + rule + "_EXPRESSION", (constrQuery));
+			String constrQuery = constructConstraintQuery(constraint);	
 			
-			List <String> superClasses = getSuperClasses(assetName + "_EXPRESSION");
-//			List<String> subclasses = getSubClasses(encode( rule + "_EXPRESSION"));
-//			List<String> equivalentClasses = getEquivalentClasses(encode(rule + "_EXPRESSION"));
-//			
-//			System.out.println("RULE: " + rule);
-			flag = superClasses.contains(rule	 + "_EXPRESSION");
+			if(!constrQuery.contains("evaluationPeriod"))
+				constrQuery += " and (evaluationPeriod some xsd:duration)";
+			
+			if(!constrQuery.contains("violationThreshold") && !constrQuery.contains("settlementCount"))
+				constrQuery += " and ((violationThreshold some xsd:decimal) or (settlementCount some xsd:decimal))";
+			
+				
+			createClassExpressionClass("neb:" + rule + "_EXPRESSION", constrQuery );
+			
+			
 
-			System.out.println("superclass:" + superClasses + "\n");
-//			System.out.println("subclass: " + subclasses + "\n");
-//			System.out.println("equivalent: " + equivalentClasses + "\n");
-
+			for(int i = 0; i < sls.size(); i++) {
+				List <String> cls = getSubClasses(rule + "_EXPRESSION");
+				System.out.println(cls);
+				flags.put(i + 1,  cls.contains(assetName + "_EXPRESSION_" + (i + 1)));
+			}
+			
 		}		
 
-//			List <String> superClasses = getSuperClasses(encode("SL_EXPRESSION"));
-//			List<String> subclasses = getSubClasses(encode("SL_EXPRESSION"));
-//			List<String> equivalentClasses = getEquivalentClasses(encode("SL_EXPRESSION"));
-//			
-//			System.out.println("superclass:" + superClasses + "\n");
-//			System.out.println("subclass: " + subclasses + "\n");
-//			System.out.println("equivalent: " + equivalentClasses + "\n");
-//		
+		
 		long endTime = System.currentTimeMillis();
 		System.out.println("Time taken to construct: " + (queryConstructionTime - startTime) + " ms");
 		System.out.println("Time taken to validate: " + (endTime - queryConstructionTime) + " ms");
 		System.out.println("Time taken for everything: " + (endTime - startTime) + " ms") ;
-		return flag;
+		System.out.println(flags);
+		return flags;
 	}
 	public void getSimpleConstraintBqa(SimpleConstraint constraint, String constraintName) {
 		constraint.setFirstArgument(getInstances("inverse%20leftOperand%20value%20" + constraintName).get(0));

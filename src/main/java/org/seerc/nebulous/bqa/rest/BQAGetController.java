@@ -1,5 +1,6 @@
 package org.seerc.nebulous.bqa.rest;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ public class BQAGetController {
 	@GetMapping("/validate")
 	public void validate(@RequestParam String uuid) {
 		int counter = 0;
+
 		while(!ontology.hasPolicy(uuid) && counter < 5) {
 			counter++;
 			try {
@@ -25,13 +27,15 @@ public class BQAGetController {
 				e.printStackTrace();
 			}
 		}
-		boolean valid = ontology.validate("SLA_" + uuid);
-		System.out.println(uuid + ": " + valid);
+		Map<Integer, Boolean> valid = ontology.validate("SLA_" + uuid);
+		System.out.println(uuid + ": " + !valid.containsValue(false));
 		
 		String corrId= ontology.getCorrelationId(uuid);
 		ontology.removePolicy(uuid);
 		
-		conn.sendValidation(uuid, corrId, valid);
+		
+		
+		conn.sendValidation(uuid, corrId, !valid.containsValue(false), "One or more Service Levels are contradicting the meta-constraints");
 	}
 	
 }
