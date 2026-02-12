@@ -15,7 +15,7 @@ public class BQAGetController {
 	
 
 	@GetMapping("/validate")
-	public void validate(@RequestParam String uuid) {
+	public boolean validate(@RequestParam String uuid) {
 		int counter = 0;
 
 		while(!ontology.hasPolicy(uuid) && counter < 5) {
@@ -36,6 +36,7 @@ public class BQAGetController {
 		
 		
 		conn.sendValidation(uuid, corrId, !valid.containsValue(false), "One or more Service Levels are contradicting the meta-constraints");
+		return !valid.containsValue(false);
 	}
 	
 }
