@@ -110,12 +110,15 @@ public class EXNConnection {
 		return singleton;
 	}
 	
-	public void sendValidation(String uuid, String correlationId, boolean valid) {
+	public void sendValidation(String uuid, String correlationId, boolean valid, String message) {
      
-		bqaVerification.send(Map.of("uuid", uuid, "valid", valid, "message", 
-			valid ? "The application is valid" : "The application is not valid"),
-			uuid,  Map.of("correlation-id", correlationId));
-	
+		bqaVerification.send(Map.of(
+				"uuid", uuid, 
+				"valid", valid,
+				"message",message),
+				 uuid, 
+				 Map.of("correlation-id", correlationId)
+			);
 	}
 	
 }
